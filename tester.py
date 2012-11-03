@@ -95,7 +95,7 @@ def InitCalcKeyHandleSys(hwnd):
 def ClickButton(handle):
     SendMessage(handle, BM_CLICK, 0, 0)
 
-def GenerateTestData():
+def GenerateTestData(input):
     calc = subprocess.Popen("calc.exe")
     while True:
         WaitForInputIdleByPid(calc.pid)
@@ -104,18 +104,13 @@ def GenerateTestData():
             break
         time.sleep(0.1)
 
-    CalcKeyHandle = CalcKeyHandleSys
-    ClickButton(CalcKeyHandle['1'])
-    print(GetWindowTextByHwnd(CalcKeyHandle['result']))
-    ClickButton(CalcKeyHandle['0'])
-    print(GetWindowTextByHwnd(CalcKeyHandle['result']))
-    ClickButton(CalcKeyHandle['+'])
-    print(GetWindowTextByHwnd(CalcKeyHandle['result']))
-    ClickButton(CalcKeyHandle['2'])
-    print(GetWindowTextByHwnd(CalcKeyHandle['result']))
-    ClickButton(CalcKeyHandle['='])
-    print(GetWindowTextByHwnd(CalcKeyHandle['result']))
-
+    data = []
+    for x in input:
+        ClickButton(CalcKeyHandleSys[x])
+        result = GetWindowTextByHwnd(CalcKeyHandleSys['result'])
+        data.append({'input':x, 'output':result})
+    calc.terminate()
+    return data
 
 def TestCalc(path, testdata):
     calc = subprocess.Popen(path)
@@ -142,6 +137,6 @@ def TestCalc(path, testdata):
 def main():
     #TestCalc(r"C:\project\AlCalc\AlCalc\bin\Release\AlCalc.exe", None)#sys.argv[1]
 
-    GenerateTestData()
+    GenerateTestData(list("1.0+2="))
 
 main()
