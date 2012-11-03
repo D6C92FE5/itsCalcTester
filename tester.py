@@ -8,7 +8,6 @@ from ctypes import *
 EnumChildWindows = windll.User32.EnumChildWindows
 FindWindow = windll.User32.FindWindowW
 SendMessage = windll.User32.SendMessageW
-PostMessage = windll.User32.PostMessageW
 GetClassName = windll.User32.GetClassNameW
 GetWindowThreadProcessId = windll.User32.GetWindowThreadProcessId
 EnumWindows = windll.User32.EnumWindows
@@ -18,9 +17,6 @@ OpenProcess = windll.Kernel32.OpenProcess
 WM_GETTEXT = 0x000D
 BM_CLICK = 0x00F5
 PROCESS_QUERY_INFORMATION = 0x0400
-WM_KEYDOWN = 0x0100
-WM_KEYUP = 0x0101
-WM_CHAR = 0x0102
 
 buffer = create_string_buffer(1000)
 def GetWindowTextByHwnd(hwnd):
@@ -52,13 +48,6 @@ def WaitForInputIdleByPid(pid):
     WaitForInputIdle(hProcess, 10000)
 
 CalcKey = set('0123456789.+-*/=←C±√') | {'CE', '1/x'}
-CalcKeyCode = {
-    '0':0x30, '1':0x31, '2':0x32, '3':0x33, '4':0x34,
-    '5':0x35, '6':0x36, '7':0x37, '8':0x38, '9':0x39,
-    '.':0xBE, '+':0x100BB, '-':0xBD, '*':0x10038, '/':0xBF,
-    '=':0xBB, '←':0x8, 'C':0x1B, '±':0x78, '√':0x10032,
-    'CE':0x2E, '1/x':0x52,
-}
 CalcKeyHandle = {}
 def InitCalcKeyHandle(hwnd):
     def Callback(hwnd, lParam=None):
@@ -153,7 +142,6 @@ def TestCalc(path, testdata):
 def main():
     #TestCalc(r"C:\project\AlCalc\AlCalc\bin\Release\AlCalc.exe", None)#sys.argv[1]
 
-    #calcstd = subprocess.Popen("calc.exe")
     GenerateTestData()
 
 main()
