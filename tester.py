@@ -3,6 +3,7 @@
 import sys
 import time
 import subprocess
+import random
 
 from ctypes import *
 EnumChildWindows = windll.User32.EnumChildWindows
@@ -99,6 +100,8 @@ def GenerateTestData(input):
     calc = subprocess.Popen("calc.exe")
     while True:
         WaitForInputIdleByPid(calc.pid)
+        global CalcKeyHandleSys
+        CalcKeyHandleSys = {}
         InitCalcKeyHandleSys(GetHwndByPid(calc.pid))
         if len(CalcKeyHandleSys) != 0:
             break
@@ -116,6 +119,8 @@ def TestCalc(path, testdata):
     calc = subprocess.Popen(path)
     while True:
         WaitForInputIdleByPid(calc.pid)
+        global CalcKeyHandle
+        CalcKeyHandle = {}
         InitCalcKeyHandle(GetHwndByPid(calc.pid))
         if len(CalcKeyHandle) != 0:
             break
@@ -140,7 +145,11 @@ def TestCalc(path, testdata):
     calc.terminate()
 
 def main():
-    data = GenerateTestData("1 . 0 + 0 . 2 =".split())
-    TestCalc(sys.argv[1], data)
+    for i in range(100):
+        rand = []
+        for x in range(100):
+            rand.append(random.choice(list(CalcKey)))
+        data = GenerateTestData(rand)#"1 . 0 + 0 . 2 =".split())
+        TestCalc(sys.argv[1], data)
 
 main()
