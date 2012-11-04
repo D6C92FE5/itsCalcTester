@@ -58,7 +58,7 @@ def InitCalcKeyHandle(hwnd):
             s = GetWindowTextByHwnd(hwnd)
             if s in CalcKey:
                 CalcKeyHandle[s] = hwnd
-        elif "STATIC" in ClassName:
+        elif "STATIC" in ClassName or "EDIT" in ClassName:
             s = GetWindowTextByHwnd(hwnd)
             if s == "0":
                 CalcKeyHandle['result'] = hwnd
