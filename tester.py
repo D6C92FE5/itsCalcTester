@@ -121,22 +121,26 @@ def TestCalc(path, testdata):
             break
         time.sleep(0.1)
 
-    ClickButton(CalcKeyHandle['1'])
-    print(GetWindowTextByHwnd(CalcKeyHandle['result']))
-    ClickButton(CalcKeyHandle['0'])
-    print(GetWindowTextByHwnd(CalcKeyHandle['result']))
-    ClickButton(CalcKeyHandle['+'])
-    print(GetWindowTextByHwnd(CalcKeyHandle['result']))
-    ClickButton(CalcKeyHandle['2'])
-    print(GetWindowTextByHwnd(CalcKeyHandle['result']))
-    ClickButton(CalcKeyHandle['='])
-    print(GetWindowTextByHwnd(CalcKeyHandle['result']))
+    inputs = []
+    isPass = True
+    for x in testdata:
+        ClickButton(CalcKeyHandle[x['input']])
+        inputs.append(x['input'])
+        output = GetWindowTextByHwnd(CalcKeyHandle['result'])
+        if output != x['output']:
+            isPass = False
+            print("测试没有通过")
+            print("点击的按钮：", " ".join(inputs))
+            print("正确的结果：", x['output'])
+            print("实际的结果：", output)
+            break
+    if isPass:
+        print("测试通过，点击的按钮：", " ".join(inputs))
 
     calc.terminate()
 
 def main():
-    #TestCalc(r"C:\project\AlCalc\AlCalc\bin\Release\AlCalc.exe", None)#sys.argv[1]
-
-    GenerateTestData(list("1.0+2="))
+    data = GenerateTestData("1 . 0 + 0 . 2 =".split())
+    TestCalc(sys.argv[1], data)
 
 main()
