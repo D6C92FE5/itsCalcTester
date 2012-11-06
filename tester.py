@@ -140,16 +140,33 @@ def TestCalc(path, testdata):
             print("实际的结果：", output)
             break
     if isPass:
-        print("测试通过，点击的按钮：", " ".join(inputs))
+        print("测试通过")
+        print("点击的按钮：", " ".join(inputs))
 
     calc.terminate()
 
-def main():
+def test_from_file():
+    with open("testdata.txt", 'r', encoding='utf-8') as fp:
+        testdata = [x.strip('\n') for x in fp.readlines()]
+
+    testdata = [x.split() for x in testdata if len(x) > 0]
+
+    for x in testdata:
+        data = GenerateTestData(x[1:])
+        print(x[0])
+        TestCalc(sys.argv[1], data)
+        print()
+
+def test_from_rand():
     for i in range(100):
         rand = []
         for x in range(100):
             rand.append(random.choice(list(CalcKey)))
-        data = GenerateTestData(rand)#"1 . 0 + 0 . 2 =".split())
+        data = GenerateTestData(rand)
         TestCalc(sys.argv[1], data)
+        print()
+
+def main():
+    test_from_rand()
 
 main()
