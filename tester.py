@@ -210,8 +210,7 @@ def TestCalc(path, testdata):
         ClickButton(CalcKeyHandle[x['input']])
         inputs.append(x['input'])
         output = GetWindowTextByHwnd(CalcKeyHandle['result'])
-        if output != x['output']:
-        #if output.strip(". ") != x['output'].strip(". "):
+        if not IsResultEqual(output, x['output']):
             isPass = False
             print("测试没有通过")
             print("点击的按钮：", " ".join(inputs))
@@ -225,6 +224,19 @@ def TestCalc(path, testdata):
     calc.terminate()
 
     return isPass
+
+def IsResultEqual(a, b):
+    if a == b:
+        return True
+    try:
+        if (len(a) > 14 or len(b) > 14) and \
+           (abs(1 - float(a) / float(b)) < 10e14):
+            return True
+    except:
+        pass
+    if '+/-' in CalcKey and a.strip(". ") == b.strip(". "):
+        return True
+    return False
 
 def test_from_file():
     with open("testdata.txt", 'r', encoding='utf-8') as fp:
@@ -245,13 +257,19 @@ def test_from_file():
     print("通过计数：", pass_count)
 
 def test_from_rand():
+    test_count = 0
+    pass_count = 0
     for i in range(100):
+        test_count += 1
         rand = []
         for x in range(100):
             rand.append(random.choice(list(CalcKey)))
         data = GenerateTestData(rand)
-        TestCalc(sys.argv[1], data)
+        if TestCalc(sys.argv[1], data):
+            pass_count += 1
         print()
+    print("测试计数：", test_count)
+    print("通过计数：", pass_count)
 
 def main():
     """global path_system_calc
