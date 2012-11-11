@@ -81,7 +81,6 @@ def InitCalcKeyHandle(hwnd):
     CallbackT = CFUNCTYPE(c_int, c_int)
     CallbackC = CallbackT(Callback)
     EnumChildWindows(hwnd, CallbackC)
-    InitCalcKeyGroup(CalcKeyHandle)
 
 CalcKeyHandleSys = {}
 def InitCalcKeyHandleSys(hwnd):
@@ -107,7 +106,6 @@ def InitCalcKeyHandleSys(hwnd):
             'M-', '√', '%', '1/x', '=']
     global CalcKeyHandleSys
     CalcKeyHandleSys = dict(zip(keys, handles))
-    InitCalcKeyGroup(CalcKeyHandleSys)
 
 def InitCalcKeyHandleSysXp(hwnd):
     def Callback(hwnd, lParam=None):
@@ -126,7 +124,6 @@ def InitCalcKeyHandleSysXp(hwnd):
     CallbackT = CFUNCTYPE(c_int, c_int)
     CallbackC = CallbackT(Callback)
     EnumChildWindows(hwnd, CallbackC)
-    InitCalcKeyGroup(CalcKeyHandleSys)
 
 def ClickButton(handle):
     SendMessage(handle, BM_CLICK, 0, 0)
@@ -142,6 +139,8 @@ def GenerateTestData(input):
         if len(CalcKeyHandleSys) != 0:
             break
         time.sleep(0.1)
+
+    InitCalcKeyGroup(CalcKeyHandleSys)
 
     data = []
     for x in input:
@@ -161,6 +160,8 @@ def TestCalc(path, testdata):
         if len(CalcKeyHandle) != 0:
             break
         time.sleep(0.1)
+
+    InitCalcKeyGroup(CalcKeyHandle)
 
     inputs = []
     isPass = True
