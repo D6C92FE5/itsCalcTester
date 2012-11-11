@@ -48,58 +48,21 @@ def WaitForInputIdleByPid(pid):
     hProcess = OpenProcess(PROCESS_QUERY_INFORMATION, False, pid)
     WaitForInputIdle(hProcess, 10000)
 
+CalcKey = set('0123456789.+-*/=←C±√') | \
+          {'Backspace', 'CE', '1/x', '+/-', 'sqt', 'sqrt'}
+CalcKeyGroup = [['←', 'Backspace'],
+                ['±', '+/-'],
+                ['√', 'sqt', 'sqrt']]
+def InitCalcKeyGroup(KeyHandle):
+    for group in CalcKeyGroup:
+        h = None
+        for x in group:
+            if x in KeyHandle:
+                h = KeyHandle[x]
+                break
+        for x in group:
+            KeyHandle[x] = h
 
-import subprocess
-import random
-
-from ctypes import *
-EnumChildWindows = windll.User32.EnumChildWindows
-FindWindow = windll.User32.FindWindowW
-SendMessage = windll.User32.SendMessageW
-GetClassName = windll.User32.GetClassNameW
-GetWindowThreadProcessId = windll.User32.GetWindowThreadProcessId
-EnumWindows = windll.User32.EnumWindows
-WaitForInputIdle = windll.User32.WaitForInputIdle
-OpenProcess = windll.Kernel32.OpenProcess
-
-WM_GETTEXT = 0x000D
-BM_CLICK = 0x00F5
-PROCESS_QUERY_INFORMATION = 0x0400
-
-buffer = create_string_buffer(1000)
-def GetWindowTextByHwnd(hwnd):
-    global buffer
-    l = SendMessage(hwnd, WM_GETTEXT, int(len(buffer) / 2), buffer)
-    return buffer[:l * 2].decode('utf-16')
-def GetClassNameByHwnd(hwnd):
-    global buffer
-    l = GetClassName(hwnd, buffer, int(len(buffer) / 2))
-    return buffer[:l * 2].decode('utf-16')
-
-def GetHwndByPid(pid):
-    def Callback(hwnd, lParam=None):
-        pidT = c_int()
-        GetWindowThreadProcessId(hwnd, byref(pidT))
-        if pidT.value == pid:
-            nonlocal result
-            result = hwnd
-            return False
-        return True
-    CallbackT = CFUNCTYPE(c_int, c_int)
-    CallbackC = CallbackT(Callback)
-    result = 0
-    EnumWindows(CallbackC)
-    return result
-
-def WaitForInputIdleByPid(pid):
-    hProcess = OpenProcess(PROCESS_QUERY_INFORMATION, False, pid)
-    WaitForInputIdle(hProcess, 10000)
-
-CalcKey = set('0123456789.+-*/=←C±√') | {'CE', '1/x'}
-CalcKeyXp = set('0123456789.+-*/=←C±√') | \
-          {'Backspace', 'CE', '1/x', '+/-', 'sqt'}
-CalcKeyMap = {'←':'Backspace', '±':'+/-', '√':'sqt', }
-CalcKeyMapXp = {'←':'Backspace', '±':'+/-', '√':'sqt', }
 CalcKeyHandle = {}
 def InitCalcKeyHandle(hwnd):
     def Callback(hwnd, lParam=None):
@@ -118,6 +81,7 @@ def InitCalcKeyHandle(hwnd):
     CallbackT = CFUNCTYPE(c_int, c_int)
     CallbackC = CallbackT(Callback)
     EnumChildWindows(hwnd, CallbackC)
+    InitCalcKeyGroup(CalcKeyHandle)
 
 CalcKeyHandleSys = {}
 def InitCalcKeyHandleSys(hwnd):
@@ -143,6 +107,7 @@ def InitCalcKeyHandleSys(hwnd):
             'M-', '√', '%', '1/x', '=']
     global CalcKeyHandleSys
     CalcKeyHandleSys = dict(zip(keys, handles))
+    InitCalcKeyGroup(CalcKeyHandleSys)
 
 def InitCalcKeyHandleSysXp(hwnd):
     def Callback(hwnd, lParam=None):
@@ -161,6 +126,7 @@ def InitCalcKeyHandleSysXp(hwnd):
     CallbackT = CFUNCTYPE(c_int, c_int)
     CallbackC = CallbackT(Callback)
     EnumChildWindows(hwnd, CallbackC)
+    InitCalcKeyGroup(CalcKeyHandleSys)
 
 def ClickButton(handle):
     SendMessage(handle, BM_CLICK, 0, 0)
@@ -176,10 +142,6 @@ def GenerateTestData(input):
         if len(CalcKeyHandleSys) != 0:
             break
         time.sleep(0.1)
-
-    for k, v in CalcKeyMap.items():
-        if k not in CalcKeyHandleSys:
-            CalcKeyHandleSys[k] = CalcKeyHandleSys[v]
 
     data = []
     for x in input:
@@ -199,10 +161,6 @@ def TestCalc(path, testdata):
         if len(CalcKeyHandle) != 0:
             break
         time.sleep(0.1)
-
-    for k, v in CalcKeyMap.items():
-        if k not in CalcKeyHandle:
-            CalcKeyHandle[k] = CalcKeyHandle[v]
 
     inputs = []
     isPass = True
@@ -238,8 +196,8 @@ def IsResultEqual(a, b):
         return True
     return False
 
-def test_from_file():
-    with open("testdata.txt", 'r', encoding='utf-8') as fp:
+def test_from_file(filename):
+    with open(filename, 'r', encoding='utf-8') as fp:
         testdata = [x.strip('\n') for x in fp.readlines()]
 
     testdata = [x.split() for x in testdata if len(x) > 0]
@@ -274,11 +232,9 @@ def test_from_rand():
 def main():
     """global path_system_calc
     path_system_calc = r"D:\temp\calc.exe"
-    global CalcKey, CalcKeyXp
-    CalcKey = CalcKeyXp
     global InitCalcKeyHandleSys, InitCalcKeyHandleSysXp
     InitCalcKeyHandleSys = InitCalcKeyHandleSysXp"""
-    test_from_rand()
-    #test_from_file()
+    #test_from_rand()
+    test_from_file("testdata_simple.txt")
 
 main()
