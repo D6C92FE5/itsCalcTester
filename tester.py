@@ -7,6 +7,7 @@ import subprocess
 import random
 
 from ctypes import *
+from ctypes.wintypes import *
 EnumChildWindows = windll.User32.EnumChildWindows
 FindWindow = windll.User32.FindWindowW
 SendMessage = windll.User32.SendMessageW
@@ -31,7 +32,7 @@ def GetClassNameByHwnd(hwnd):
     return buffer[:l * 2].decode('utf-16')
 
 def GetHwndByPid(pid):
-    def Callback(hwnd, lParam=None):
+    def Callback(hwnd, lParam):
         pidT = c_int()
         GetWindowThreadProcessId(hwnd, byref(pidT))
         if pidT.value == pid:
@@ -39,10 +40,10 @@ def GetHwndByPid(pid):
             result = hwnd
             return False
         return True
-    CallbackT = CFUNCTYPE(c_int, c_int)
+    CallbackT = WINFUNCTYPE(BOOL, HWND, LPARAM)
     CallbackC = CallbackT(Callback)
     result = 0
-    EnumWindows(CallbackC)
+    EnumWindows(CallbackC, 0)
     return result
 
 def WaitForInputIdleByPid(pid):
@@ -79,13 +80,13 @@ def InitCalcKeyHandle(hwnd):
             if s == "0":
                 CalcKeyHandle['result'] = hwnd
         return True
-    CallbackT = CFUNCTYPE(c_int, c_int)
+    CallbackT = WINFUNCTYPE(BOOL, HWND, LPARAM)
     CallbackC = CallbackT(Callback)
-    EnumChildWindows(hwnd, CallbackC)
+    EnumChildWindows(hwnd, CallbackC, 0)
 
 CalcKeyHandleSys = {}
 def InitCalcKeyHandleSys(hwnd):
-    def Callback(hwnd, lParam=None):
+    def Callback(hwnd, lParam):
         ClassName = GetClassNameByHwnd(hwnd)
         if "Button" in ClassName:
             handles.append(hwnd)
@@ -95,10 +96,10 @@ def InitCalcKeyHandleSys(hwnd):
                 handles.append(hwnd)
         return True
 
-    CallbackT = CFUNCTYPE(c_int, c_int)
+    CallbackT = WINFUNCTYPE(BOOL, HWND, LPARAM)
     CallbackC = CallbackT(Callback)
     handles = []
-    EnumChildWindows(hwnd, CallbackC)
+    EnumChildWindows(hwnd, CallbackC, 0)
     keys = ['result',
             'MC', '←', '7', '4', '1', '0',
             'MR', 'CE', '8', '5', '2',
@@ -122,9 +123,9 @@ def InitCalcKeyHandleSysXp(hwnd):
             if s == "0. ":
                 CalcKeyHandleSys['result'] = hwnd
         return True
-    CallbackT = CFUNCTYPE(c_int, c_int)
+    CallbackT = WINFUNCTYPE(BOOL, HWND, LPARAM)
     CallbackC = CallbackT(Callback)
-    EnumChildWindows(hwnd, CallbackC)
+    EnumChildWindows(hwnd, CallbackC, 0)
 
 def ClickButton(handle):
     SendMessage(handle, BM_CLICK, 0, 0)
