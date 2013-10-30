@@ -13,7 +13,7 @@ itsCalcTester
 使用方法
 ====================
 
-tester.py <mycalc.exe> [<testdata.txt>]
+tester.py &lt;mycalc.exe> [&lt;testdata.txt>]
 
 
 许可证
