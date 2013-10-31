@@ -5,6 +5,7 @@ import sys
 import time
 import subprocess
 import random
+from os import path
 
 from ctypes import *
 from ctypes.wintypes import *
@@ -238,6 +239,7 @@ def main():
     global InitCalcKeyHandleSys, InitCalcKeyHandleSysXp
     InitCalcKeyHandleSys = InitCalcKeyHandleSysXp"""
     #test_from_rand()
-    test_from_file(sys.argv[2] if len(sys.argv) > 2 else "testdata.txt")
+    default_testdata = path.join(path.dirname(__file__), "testdata.txt")
+    test_from_file(sys.argv[2] if len(sys.argv) > 2 else default_testdata)
 
 main()
