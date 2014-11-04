@@ -15,6 +15,7 @@ SendMessage = windll.User32.SendMessageW
 GetClassName = windll.User32.GetClassNameW
 GetWindowThreadProcessId = windll.User32.GetWindowThreadProcessId
 EnumWindows = windll.User32.EnumWindows
+IsWindowVisible = windll.User32.IsWindowVisible
 WaitForInputIdle = windll.User32.WaitForInputIdle
 OpenProcess = windll.Kernel32.OpenProcess
 
@@ -34,12 +35,13 @@ def GetClassNameByHwnd(hwnd):
 
 def GetHwndByPid(pid):
     def Callback(hwnd, lParam):
-        pidT = c_int()
-        GetWindowThreadProcessId(hwnd, byref(pidT))
-        if pidT.value == pid:
-            nonlocal result
-            result = hwnd
-            return False
+        if IsWindowVisible(hwnd):
+            pidT = c_int()
+            GetWindowThreadProcessId(hwnd, byref(pidT))
+            if pidT.value == pid:
+                nonlocal result
+                result = hwnd
+                return False
         return True
     CallbackT = WINFUNCTYPE(BOOL, HWND, LPARAM)
     CallbackC = CallbackT(Callback)
